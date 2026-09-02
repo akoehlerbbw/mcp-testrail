@@ -131,6 +131,32 @@ describe('Cases API', () => {
     expect(result.custom_epic).toBe('BBWDP-49563');
     expect(result.custom_test_id).toBe('BBWDP-50196-1');
   });
+
+  it('normalizes replacement plain-text custom fields', async () => {
+    const mockCase = {
+      id: 1,
+      title: 'Replacement fields',
+      section_id: 1,
+      template_id: 1,
+      type_id: 1,
+      priority_id: 2,
+      created_by: 1,
+      created_on: 1609459200,
+      suite_id: 1,
+      custom_case_epic_id: '<p>BBWDP-49563</p>',
+      custom_case_test_case_id: '<p>BBWDP-50196-1</p>',
+    };
+    mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
+
+    const result = await client.cases.addCase(1, {
+      title: 'Replacement fields',
+      custom_case_epic_id: '<p>BBWDP-49563</p>',
+      custom_case_test_case_id: '<p>BBWDP-50196-1</p>',
+    });
+
+    expect(result.custom_case_epic_id).toBe('BBWDP-49563');
+    expect(result.custom_case_test_case_id).toBe('BBWDP-50196-1');
+  });
   
   it('handles errors when retrieving a test case', async () => {
     // Mock error response

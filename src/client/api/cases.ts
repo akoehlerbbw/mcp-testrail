@@ -28,7 +28,12 @@ interface GetCasesParams {
 	[key: string]: string | number | boolean | null | undefined;
 }
 
-const plainTextCustomFields = new Set(["custom_epic", "custom_test_id"]);
+const plainTextCustomFields = new Set([
+	"custom_epic",
+	"custom_test_id",
+	"custom_case_epic_id",
+	"custom_case_test_case_id",
+]);
 
 function normalizePlainTextCustomFields(
 	data: Record<string, unknown>,
