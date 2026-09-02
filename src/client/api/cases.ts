@@ -28,6 +28,27 @@ interface GetCasesParams {
 	[key: string]: string | number | boolean | null | undefined;
 }
 
+const plainTextCustomFields = new Set(["custom_epic", "custom_test_id"]);
+
+function normalizePlainTextCustomFields(
+	data: Record<string, unknown>,
+): Record<string, unknown> {
+	const normalized = { ...data };
+
+	for (const fieldName of plainTextCustomFields) {
+		const value = normalized[fieldName];
+		if (typeof value === "string") {
+			normalized[fieldName] = value.replace(/^\s*<p>([\s\S]*?)<\/p>\s*$/i, "$1");
+		}
+	}
+
+	return normalized;
+}
+
+function normalizeCaseResponse<T extends Record<string, unknown>>(testCase: T): T {
+	return normalizePlainTextCustomFields(testCase) as T;
+}
+
 export class CasesClient extends BaseTestRailClient {
 	/**
 	 * Gets a specific test case by ID
@@ -109,13 +130,15 @@ export class CasesClient extends BaseTestRailClient {
 	): Promise<TestRailCase> {
 		try {
 			// Validate data with Zod schema
-			const validatedData = addCaseDataSchema.parse(data);
+			const validatedData = addCaseDataSchema.parse(
+				normalizePlainTextCustomFields(data),
+			);
 
 			const response: AxiosResponse<TestRailCase> = await this.client.post(
 				`/api/v2/add_case/${sectionId}`,
 				validatedData,
 			);
-			return response.data;
+			return normalizeCaseResponse(response.data);
 		} catch (error) {
 			throw handleApiError(
 				error,
@@ -136,13 +159,15 @@ export class CasesClient extends BaseTestRailClient {
 	): Promise<TestRailCase> {
 		try {
 			// Validate data with Zod schema
-			const validatedData = updateCaseDataSchema.parse(data);
+			const validatedData = updateCaseDataSchema.parse(
+				normalizePlainTextCustomFields(data),
+			);
 
 			const response: AxiosResponse<TestRailCase> = await this.client.post(
 				`/api/v2/update_case/${caseId}`,
 				validatedData,
 			);
-			return response.data;
+			return normalizeCaseResponse(response.data);
 		} catch (error) {
 			throw handleApiError(error, `Failed to update test case ${caseId}`);
 		}

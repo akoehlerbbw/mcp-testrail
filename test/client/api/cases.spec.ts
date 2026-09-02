@@ -76,6 +76,39 @@ describe('Cases API', () => {
     // Verify result
     expect(result).toEqual(mockCase);
   });
+
+  it('normalizes plain-text custom fields when creating a test case', async () => {
+    const mockCase = {
+      id: 1,
+      title: 'Plain-text fields',
+      section_id: 1,
+      template_id: 1,
+      type_id: 1,
+      priority_id: 2,
+      created_by: 1,
+      created_on: 1609459200,
+      suite_id: 1,
+      custom_epic: '<p>BBWDP-49563</p>',
+      custom_test_id: '<p>BBWDP-50196-1</p>',
+    };
+    mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
+
+    const caseData = {
+      title: 'Plain-text fields',
+      custom_epic: '<p>BBWDP-49563</p>',
+      custom_test_id: '<p>BBWDP-50196-1</p>',
+    };
+
+    const result = await client.cases.addCase(1, caseData);
+
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_case/1', {
+      ...caseData,
+      custom_epic: 'BBWDP-49563',
+      custom_test_id: 'BBWDP-50196-1',
+    });
+    expect(result.custom_epic).toBe('BBWDP-49563');
+    expect(result.custom_test_id).toBe('BBWDP-50196-1');
+  });
   
   it('handles errors when retrieving a test case', async () => {
     // Mock error response
@@ -126,6 +159,39 @@ describe('Cases API', () => {
     
     // Verify result
     expect(result).toEqual(mockCase);
+  });
+
+  it('normalizes plain-text custom fields when updating a test case', async () => {
+    const mockCase = {
+      id: 1,
+      title: 'Updated plain-text fields',
+      section_id: 1,
+      template_id: 1,
+      type_id: 2,
+      priority_id: 3,
+      created_by: 1,
+      created_on: 1609459200,
+      suite_id: 1,
+      custom_epic: '<p>BBWDP-49563</p>',
+      custom_test_id: '<p>BBWDP-50196-1</p>',
+    };
+    mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
+
+    const caseData = {
+      title: 'Updated plain-text fields',
+      custom_epic: '<p>BBWDP-49563</p>',
+      custom_test_id: '<p>BBWDP-50196-1</p>',
+    };
+
+    const result = await client.cases.updateCase(1, caseData);
+
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_case/1', {
+      ...caseData,
+      custom_epic: 'BBWDP-49563',
+      custom_test_id: 'BBWDP-50196-1',
+    });
+    expect(result.custom_epic).toBe('BBWDP-49563');
+    expect(result.custom_test_id).toBe('BBWDP-50196-1');
   });
 
   it('deletes a test case', async () => {
