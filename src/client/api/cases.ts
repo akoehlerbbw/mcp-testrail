@@ -60,7 +60,7 @@ export class CasesClient extends BaseTestRailClient {
 			const response: AxiosResponse<TestRailCase> = await this.client.get(
 				`/api/v2/get_case/${caseId}`,
 			);
-			return response.data;
+			return normalizeCaseResponse(response.data);
 		} catch (error) {
 			throw handleApiError(error, `Failed to get test case ${caseId}`);
 		}
@@ -104,7 +104,7 @@ export class CasesClient extends BaseTestRailClient {
 				},
 			});
 			return {
-				cases: response.data.cases,
+				cases: (response.data.cases ?? []).map(normalizeCaseResponse),
 				offset: response.data.offset,
 				limit: response.data.limit,
 				size: response.data.size,

@@ -41,6 +41,28 @@ describe('Cases API', () => {
     // Verify result
     expect(result).toEqual(mockCase);
   });
+
+  it('normalizes plain-text custom fields when retrieving a test case', async () => {
+    const mockCase = {
+      id: 1,
+      title: 'Retrieved plain-text fields',
+      section_id: 1,
+      template_id: 1,
+      type_id: 1,
+      priority_id: 2,
+      created_by: 1,
+      created_on: 1609459200,
+      suite_id: 1,
+      custom_epic: '<p>BBWDP-49563</p>',
+      custom_test_id: '<p>BBWDP-50196-1</p>',
+    };
+    mockAxiosInstance.get.mockResolvedValue({ data: mockCase });
+
+    const result = await client.cases.getCase(1);
+
+    expect(result.custom_epic).toBe('BBWDP-49563');
+    expect(result.custom_test_id).toBe('BBWDP-50196-1');
+  });
   
   it('creates a new test case', async () => {
     // Mock response
